@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -26,6 +27,12 @@ from "./pages/Album";
 function Home({
   user,
   setUser,
+  search,
+  setSearch,
+  likedSongs,
+  setLikedSongs,
+  playlists,
+  setPlaylists,
 }) {
 
   return (
@@ -43,9 +50,17 @@ function Home({
       <Navbar
         user={user}
         setUser={setUser}
+        search={search}
+        setSearch={setSearch}
       />
 
-      <DisplayHome />
+      <DisplayHome
+        search={search}
+        likedSongs={likedSongs}
+        setLikedSongs={setLikedSongs}
+        playlists={playlists}
+        setPlaylists={setPlaylists}
+      />
 
     </div>
   );
@@ -55,6 +70,68 @@ function App() {
 
   const [user, setUser] =
     useState(null);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [likedSongs,
+    setLikedSongs] =
+    useState([]);
+
+  const [playlists,
+    setPlaylists] =
+    useState([]);
+
+  // LOAD STORAGE
+  useEffect(() => {
+
+    const likes =
+      JSON.parse(
+        localStorage.getItem(
+          "likedSongs"
+        )
+      );
+
+    const storedPlaylists =
+      JSON.parse(
+        localStorage.getItem(
+          "playlists"
+        )
+      );
+
+    if (likes)
+      setLikedSongs(likes);
+
+    if (storedPlaylists)
+      setPlaylists(
+        storedPlaylists
+      );
+
+  }, []);
+
+  // SAVE STORAGE
+  useEffect(() => {
+
+    localStorage.setItem(
+      "likedSongs",
+
+      JSON.stringify(
+        likedSongs
+      )
+    );
+
+    localStorage.setItem(
+      "playlists",
+
+      JSON.stringify(
+        playlists
+      )
+    );
+
+  }, [
+    likedSongs,
+    playlists,
+  ]);
 
   return (
     <BrowserRouter>
@@ -88,6 +165,12 @@ function App() {
                 <Home
                   user={user}
                   setUser={setUser}
+                  search={search}
+                  setSearch={setSearch}
+                  likedSongs={likedSongs}
+                  setLikedSongs={setLikedSongs}
+                  playlists={playlists}
+                  setPlaylists={setPlaylists}
                 />
               }
             />
@@ -101,7 +184,6 @@ function App() {
 
         </div>
 
-        {/* PLAYER */}
         <Player />
 
       </div>

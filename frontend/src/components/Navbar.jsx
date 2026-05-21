@@ -4,28 +4,63 @@ from "./Login";
 const Navbar = ({
   user,
   setUser,
+  search,
+  setSearch,
 }) => {
 
   return (
     <div
       className="
         flex
+        flex-col
+        md:flex-row
         items-center
         justify-between
         gap-4
+        mb-6
       "
     >
 
       {/* LEFT */}
-      <h1
+      <div
         className="
-          text-2xl
-          md:text-3xl
-          font-bold
+          flex
+          items-center
+          gap-4
+          w-full
         "
       >
-        Home
-      </h1>
+
+        <h1
+          className="
+            text-2xl
+            md:text-3xl
+            font-bold
+            whitespace-nowrap
+          "
+        >
+          Home
+        </h1>
+
+        <input
+          type="text"
+          placeholder="Search songs..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          className="
+            bg-[#242424]
+            px-4
+            py-2
+            rounded-full
+            outline-none
+            w-full
+            max-w-md
+          "
+        />
+
+      </div>
 
       {/* RIGHT */}
       <Login

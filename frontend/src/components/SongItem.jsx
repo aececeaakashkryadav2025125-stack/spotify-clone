@@ -1,118 +1,252 @@
-import { useContext }
-from "react";
+import {
+  useContext,
+} from "react";
+
+import {
+  FaHeart,
+  FaRegHeart,
+  FaPlus,
+} from "react-icons/fa";
 
 import {
   PlayerContext,
-}
-from "../context/PlayerContext";
+} from "../context/PlayerContext";
 
 const SongItem = ({
-  id,
-  name,
-  artist,
-  image,
+  song,
+  likedSongs,
+  setLikedSongs,
+  playlists,
+  setPlaylists,
 }) => {
 
   const {
+
     playWithId,
-  } = useContext(PlayerContext);
+
+    addToQueue,
+
+  } = useContext(
+    PlayerContext
+  );
+
+  // LIKE
+  const isLiked =
+    likedSongs.some(
+      (item) =>
+        item.id === song.id
+    );
+
+  const toggleLike =
+    (e) => {
+
+      e.stopPropagation();
+
+      if (isLiked) {
+
+        const updatedSongs =
+          likedSongs.filter(
+            (item) =>
+              item.id !== song.id
+          );
+
+        setLikedSongs(
+          updatedSongs
+        );
+
+      } else {
+
+        setLikedSongs([
+          ...likedSongs,
+          song,
+        ]);
+
+      }
+    };
+
+  // ADD PLAYLIST
+  const addToPlaylist =
+    (e) => {
+
+      e.stopPropagation();
+
+      if (
+        playlists.length === 0
+      ) {
+
+        alert(
+          "Create playlist first"
+        );
+
+        return;
+      }
+
+      const playlistName =
+        prompt(
+          "Enter playlist name"
+        );
+
+      const updatedPlaylists =
+        playlists.map(
+          (playlist) => {
+
+            if (
+              playlist.name ===
+              playlistName
+            ) {
+
+              const alreadyExists =
+                playlist.songs.some(
+                  (item) =>
+                    item.id ===
+                    song.id
+                );
+
+              if (
+                !alreadyExists
+              ) {
+
+                return {
+
+                  ...playlist,
+
+                  songs: [
+                    ...playlist.songs,
+                    song,
+                  ],
+                };
+              }
+            }
+
+            return playlist;
+          }
+        );
+
+      setPlaylists(
+        updatedPlaylists
+      );
+    };
+
+  // ADD QUEUE
+  const handleQueue =
+    (e) => {
+
+      e.stopPropagation();
+
+      addToQueue(song);
+    };
 
   return (
+
     <div
+      onClick={() =>
+        playWithId(song.id)
+      }
       className="
-        relative
+        min-w-[180px]
         p-3
         rounded-lg
-        hover:bg-[#242424]
-        transition-all
-        duration-300
         cursor-pointer
-        group
+        hover:bg-[#242424]
+        transition
+        relative
       "
     >
 
       {/* IMAGE */}
-      <div className="relative">
+      <img
+        src={song.image}
+        alt=""
+        className="
+          w-full
+          h-[180px]
+          object-cover
+          rounded-lg
+        "
+      />
 
-        <img
-          src={image}
-          alt=""
+      {/* BUTTONS */}
+      <div
+        className="
+          absolute
+          top-4
+          right-4
+          flex
+          gap-3
+          text-xl
+        "
+      >
+
+        {/* HEART */}
+        <div
+          onClick={toggleLike}
           className="
-            rounded-lg
-            w-full
-            h-[220px]
-            object-cover
+            cursor-pointer
+          "
+        >
+
+          {isLiked ? (
+
+            <FaHeart
+              className="
+                text-green-500
+              "
+            />
+
+          ) : (
+
+            <FaRegHeart />
+
+          )}
+
+        </div>
+
+        {/* PLAYLIST */}
+        <FaPlus
+          onClick={addToPlaylist}
+          className="
+            cursor-pointer
           "
         />
 
-        {/* PLAY BUTTON */}
+        {/* QUEUE */}
         <button
-          onClick={() => playWithId(id)}
+          onClick={handleQueue}
           className="
-            absolute
-            bottom-3
-            right-3
-
+            text-xs
             bg-green-500
-
-            w-12
-            h-12
-
-            rounded-full
-
-            flex
-            items-center
-            justify-center
-
             text-black
-            text-xl
-            font-bold
-
-            opacity-0
-            translate-y-3
-
-            group-hover:opacity-100
-            group-hover:translate-y-0
-
-            transition-all
-            duration-300
-
-            hover:scale-110
+            px-2
+            py-1
+            rounded-full
           "
         >
-          ▶
+          Queue
         </button>
 
       </div>
 
-      {/* TITLE */}
+      {/* INFO */}
       <p
         className="
           font-bold
           mt-3
-          text-sm
-          md:text-base
         "
       >
-
-        {name}
-
+        {song.name}
       </p>
 
-      {/* ARTIST */}
       <p
         className="
           text-gray-400
-          text-xs
-          md:text-sm
+          text-sm
         "
       >
-
-        {artist}
-
+        {song.artist}
       </p>
 
     </div>
+
   );
 };
 

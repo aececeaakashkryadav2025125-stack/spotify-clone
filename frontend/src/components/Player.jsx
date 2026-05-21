@@ -1,59 +1,158 @@
-import { useContext }
-from "react";
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   FaPlay,
   FaPause,
-  FaStepForward,
-  FaStepBackward,
+  FaForward,
+  FaBackward,
+  FaRandom,
+  FaRedo,
 } from "react-icons/fa";
 
 import {
   PlayerContext,
-}
-from "../context/PlayerContext";
+} from "../context/PlayerContext";
 
 const Player = () => {
 
   const {
+
+    audioRef,
+
     track,
-    playStatus,
 
-    playSong,
-    pauseSong,
+    isPlaying,
 
-    nextSong,
-    previousSong,
+    play,
 
-    seekSong,
+    pause,
 
-    seekBg,
-    seekBar,
+    next,
 
-    time,
-  } = useContext(PlayerContext);
+    previous,
+
+    shuffle,
+
+    setShuffle,
+
+    repeat,
+
+    setRepeat,
+
+    handleEnded,
+
+  } = useContext(
+    PlayerContext
+  );
+
+  const seekBg =
+    useRef();
+
+  const seekBar =
+    useRef();
+
+  const [time,
+    setTime] =
+    useState({
+
+      currentTime: {
+        second: 0,
+        minute: 0,
+      },
+
+      totalTime: {
+        second: 0,
+        minute: 0,
+      },
+    });
+
+  // UPDATE TIME
+  useEffect(() => {
+
+    audioRef.current.ontimeupdate =
+      () => {
+
+        if (
+          audioRef.current
+            .duration
+        ) {
+
+          seekBar.current.style.width =
+            Math.floor(
+              (
+                audioRef.current
+                  .currentTime /
+                audioRef.current
+                  .duration
+              ) * 100
+            ) + "%";
+
+          setTime({
+
+            currentTime: {
+
+              second:
+                Math.floor(
+                  audioRef.current
+                    .currentTime % 60
+                ),
+
+              minute:
+                Math.floor(
+                  audioRef.current
+                    .currentTime / 60
+                ),
+            },
+
+            totalTime: {
+
+              second:
+                Math.floor(
+                  audioRef.current
+                    .duration % 60
+                ),
+
+              minute:
+                Math.floor(
+                  audioRef.current
+                    .duration / 60
+                ),
+            },
+          });
+        }
+      };
+
+  }, []);
+
+  // SEEK
+  const seekSong =
+    (e) => {
+
+      audioRef.current.currentTime =
+        (
+          e.nativeEvent.offsetX /
+          seekBg.current.offsetWidth
+        ) *
+        audioRef.current.duration;
+    };
 
   return (
+
     <div
       className="
-        min-h-[120px]
+        h-[90px]
         bg-black
         border-t
         border-gray-800
-
         flex
-        flex-col
-        md:flex-row
-
         items-center
         justify-between
-
-        gap-4
-
-        px-4
-        py-3
-
-        text-white
+        px-6
       "
     >
 
@@ -63,9 +162,7 @@ const Player = () => {
           flex
           items-center
           gap-4
-
-          w-full
-          md:w-[25%]
+          w-[25%]
         "
       >
 
@@ -105,106 +202,95 @@ const Player = () => {
           flex
           flex-col
           items-center
-          gap-4
-
-          w-full
-          md:w-[50%]
+          gap-3
+          w-[50%]
         "
       >
 
-        {/* CONTROLS */}
+        {/* BUTTONS */}
         <div
           className="
             flex
             items-center
             gap-6
+            text-2xl
           "
         >
 
+          {/* SHUFFLE */}
+          <FaRandom
+            onClick={() =>
+              setShuffle(
+                !shuffle
+              )
+            }
+            className={`
+              cursor-pointer
+              ${
+                shuffle
+                  ? "text-green-500"
+                  : ""
+              }
+            `}
+          />
+
           {/* PREVIOUS */}
-          <button
-            onClick={previousSong}
+          <FaBackward
+            onClick={previous}
             className="
-              text-gray-300
-              hover:text-green-500
-              transition-all
-              duration-300
+              cursor-pointer
             "
-          >
-            <FaStepBackward size={22} />
-          </button>
+          />
 
           {/* PLAY / PAUSE */}
-          {playStatus ? (
+          {isPlaying ? (
 
-            <button
-              onClick={pauseSong}
+            <FaPause
+              onClick={pause}
               className="
-                bg-white
-                text-black
-
-                w-14
-                h-14
-
-                rounded-full
-
-                flex
-                items-center
-                justify-center
-
-                hover:scale-105
-
-                transition-all
-                duration-300
+                cursor-pointer
               "
-            >
-              <FaPause size={22} />
-            </button>
+            />
 
           ) : (
 
-            <button
-              onClick={playSong}
+            <FaPlay
+              onClick={play}
               className="
-                bg-green-500
-                text-black
-
-                w-14
-                h-14
-
-                rounded-full
-
-                flex
-                items-center
-                justify-center
-
-                hover:scale-105
-
-                transition-all
-                duration-300
+                cursor-pointer
               "
-            >
-              <FaPlay size={22} />
-            </button>
+            />
 
           )}
 
           {/* NEXT */}
-          <button
-            onClick={nextSong}
+          <FaForward
+            onClick={next}
             className="
-              text-gray-300
-              hover:text-green-500
-              transition-all
-              duration-300
+              cursor-pointer
             "
-          >
-            <FaStepForward size={22} />
-          </button>
+          />
+
+          {/* REPEAT */}
+          <FaRedo
+            onClick={() =>
+              setRepeat(
+                !repeat
+              )
+            }
+            className={`
+              cursor-pointer
+              ${
+                repeat
+                  ? "text-green-500"
+                  : ""
+              }
+            `}
+          />
 
         </div>
 
-        {/* SEEK BAR */}
+        {/* SEEK */}
         <div
           className="
             flex
@@ -214,61 +300,48 @@ const Player = () => {
           "
         >
 
-          {/* CURRENT TIME */}
-          <p
-            className="
-              text-xs
-              md:text-sm
-            "
-          >
+          {/* CURRENT */}
+          <p className="text-sm">
 
-            {time.currentTime.minute}:
-
+            {time.currentTime.minute}
+            :
             {String(
               time.currentTime.second
             ).padStart(2, "0")}
 
           </p>
 
-          {/* SEEK BAR */}
+          {/* BAR */}
           <div
             ref={seekBg}
             onClick={seekSong}
             className="
               w-full
-              bg-gray-700
+              bg-gray-600
               rounded-full
-              h-1.5
+              h-1
               cursor-pointer
-              overflow-hidden
             "
           >
 
             <hr
               ref={seekBar}
               className="
-                h-full
+                h-1
                 border-none
-                w-[0%]
-
+                w-0
                 bg-green-500
-
                 rounded-full
               "
             />
 
           </div>
 
-          {/* TOTAL TIME */}
-          <p
-            className="
-              text-xs
-              md:text-sm
-            "
-          >
+          {/* TOTAL */}
+          <p className="text-sm">
 
-            {time.totalTime.minute}:
-
+            {time.totalTime.minute}
+            :
             {String(
               time.totalTime.second
             ).padStart(2, "0")}
@@ -280,7 +353,23 @@ const Player = () => {
       </div>
 
       {/* RIGHT */}
-      <div className="hidden md:block w-[25%]"></div>
+      <div
+        className="
+          w-[25%]
+          flex
+          justify-end
+          text-sm
+          text-gray-400
+        "
+      >
+        Playing Now
+      </div>
+
+      {/* AUDIO */}
+      <audio
+        ref={audioRef}
+        onEnded={handleEnded}
+      />
 
     </div>
   );

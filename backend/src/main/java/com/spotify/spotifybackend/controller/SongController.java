@@ -1,11 +1,9 @@
 package com.spotify.spotifybackend.controller;
 
-import com.spotify.spotifybackend.entity.Song;
-
-import com.spotify.spotifybackend.service.SongService;
+import com.spotify.spotifybackend.model.Song;
+import com.spotify.spotifybackend.repository.SongRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,31 +13,23 @@ import java.util.List;
 @RequestMapping("/songs")
 
 @CrossOrigin("*")
+
 public class SongController {
 
     @Autowired
-
-    private SongService songService;
-
-    /* Get All Songs */
+    private SongRepository songRepository;
 
     @GetMapping
+    public List<Song> getSongs() {
 
-    public List<Song> getAllSongs() {
-
-        return songService.getAllSongs();
+        return songRepository.findAll();
     }
 
-    /* Add Song */
-
     @PostMapping
-
     public Song addSong(
             @RequestBody Song song
     ) {
 
-        return songService.addSong(
-                song
-        );
+        return songRepository.save(song);
     }
 }

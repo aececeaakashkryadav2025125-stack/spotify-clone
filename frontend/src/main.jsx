@@ -1,16 +1,17 @@
 import React from "react";
-
 import ReactDOM from "react-dom/client";
 
-import App from "./App";
-
 import "./index.css";
+
+import App from "./App";
 
 import PlayerContextProvider
 from "./context/PlayerContext";
 
 ReactDOM.createRoot(
-  document.getElementById("root")
+  document.getElementById(
+    "root"
+  )
 ).render(
 
   <React.StrictMode>

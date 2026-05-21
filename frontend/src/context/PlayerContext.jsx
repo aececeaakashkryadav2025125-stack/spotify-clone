@@ -1,230 +1,242 @@
 import {
   createContext,
-  useEffect,
   useRef,
   useState,
 } from "react";
 
-import { songsData }
-from "../assets/assets";
+import {
+  songsData,
+} from "../assets/assets";
 
 export const PlayerContext =
   createContext();
 
-const PlayerContextProvider = ({
-  children,
-}) => {
+const PlayerContextProvider =
+  ({ children }) => {
 
-  // AUDIO REF
-  const audioRef =
-    useRef(new Audio());
+    const audioRef =
+      useRef();
 
-  // SEEK BAR REFS
-  const seekBg = useRef();
+    const [track,
+      setTrack] =
+      useState(
+        songsData[0]
+      );
 
-  const seekBar = useRef();
+    const [isPlaying,
+      setIsPlaying] =
+      useState(false);
 
-  // CURRENT TRACK
-  const [track, setTrack] =
-    useState(songsData[0]);
+    const [shuffle,
+      setShuffle] =
+      useState(false);
 
-  // PLAY STATUS
-  const [playStatus, setPlayStatus] =
-    useState(false);
+    const [repeat,
+      setRepeat] =
+      useState(false);
 
-  // TIMER
-  const [time, setTime] =
-    useState({
-      currentTime: {
-        second: 0,
-        minute: 0,
-      },
+    // QUEUE
+    const [queue,
+      setQueue] =
+      useState([]);
 
-      totalTime: {
-        second: 0,
-        minute: 0,
-      },
-    });
+    // PLAY SONG
+    const playWithId =
+      async (id) => {
 
-  // PLAY SONG WITH ID
-  const playWithId = async (id) => {
+        const song =
+          songsData.find(
+            (item) =>
+              item.id === id
+          );
 
-    try {
+        if (!song) return;
 
-      const selectedSong =
-        songsData[id];
+        setTrack(song);
 
-      setTrack(selectedSong);
+        setTimeout(() => {
 
-      audioRef.current.src =
-        selectedSong.file;
+          audioRef.current.src =
+            song.file;
 
-      await audioRef.current.play();
+          audioRef.current.play();
 
-      setPlayStatus(true);
+          setIsPlaying(true);
 
-    } catch (error) {
+        }, 100);
+      };
 
-      console.log(error);
+    // PLAY
+    const play = () => {
 
-    }
-  };
+      audioRef.current.play();
 
-  // PLAY
-  const playSong = async () => {
+      setIsPlaying(true);
+    };
 
-    try {
+    // PAUSE
+    const pause = () => {
 
-      await audioRef.current.play();
+      audioRef.current.pause();
 
-      setPlayStatus(true);
+      setIsPlaying(false);
+    };
 
-    } catch (error) {
+    // NEXT
+    const next = () => {
 
-      console.log(error);
+      // REPEAT
+      if (repeat) {
 
-    }
-  };
+        audioRef.current.play();
 
-  // PAUSE
-  const pauseSong = () => {
+        return;
+      }
 
-    audioRef.current.pause();
+      // QUEUE FIRST
+      if (queue.length > 0) {
 
-    setPlayStatus(false);
-  };
+        const nextSong =
+          queue[0];
 
-  // NEXT
-  const nextSong = async () => {
+        setQueue(
+          queue.slice(1)
+        );
 
-    try {
+        playWithId(
+          nextSong.id
+        );
 
+        return;
+      }
+
+      // SHUFFLE
+      if (shuffle) {
+
+        const randomIndex =
+          Math.floor(
+            Math.random() *
+            songsData.length
+          );
+
+        playWithId(
+          songsData[randomIndex]
+            .id
+        );
+
+        return;
+      }
+
+      // NORMAL
       if (
         track.id <
         songsData.length - 1
       ) {
 
-        await playWithId(
+        playWithId(
           track.id + 1
         );
 
+      } else {
+
+        playWithId(0);
       }
+    };
 
-    } catch (error) {
-
-      console.log(error);
-
-    }
-  };
-
-  // PREVIOUS
-  const previousSong = async () => {
-
-    try {
+    // PREVIOUS
+    const previous = () => {
 
       if (track.id > 0) {
 
-        await playWithId(
+        playWithId(
           track.id - 1
         );
 
+      } else {
+
+        playWithId(
+          songsData.length - 1
+        );
       }
+    };
 
-    } catch (error) {
-
-      console.log(error);
-
-    }
-  };
-
-  // SEEK SONG
-  const seekSong = async (e) => {
-
-    audioRef.current.currentTime =
-      (
-        (
-          e.nativeEvent.offsetX /
-          seekBg.current.offsetWidth
-        )
-        *
-        audioRef.current.duration
-      );
-
-  };
-
-  // UPDATE TIMER + SEEK BAR
-  useEffect(() => {
-
-    audioRef.current.ontimeupdate =
+    // ENDED
+    const handleEnded =
       () => {
 
-        // SEEK BAR WIDTH
-        seekBar.current.style.width =
-          Math.floor(
-            (
-              audioRef.current.currentTime
-              /
-              audioRef.current.duration
-            )
-            * 100
-          ) + "%";
-
-        // TIMER
-        setTime({
-          currentTime: {
-            second: Math.floor(
-              audioRef.current.currentTime
-              % 60
-            ),
-
-            minute: Math.floor(
-              audioRef.current.currentTime
-              / 60
-            ),
-          },
-
-          totalTime: {
-            second: Math.floor(
-              audioRef.current.duration
-              % 60
-            ),
-
-            minute: Math.floor(
-              audioRef.current.duration
-              / 60
-            ),
-          },
-        });
+        next();
       };
 
-  }, []);
+    // ADD TO QUEUE
+    const addToQueue =
+      (song) => {
 
-  const value = {
-    track,
-    playStatus,
+        setQueue([
+          ...queue,
+          song,
+        ]);
+      };
 
-    playWithId,
-    playSong,
-    pauseSong,
+    // REMOVE QUEUE
+    const removeFromQueue =
+      (id) => {
 
-    nextSong,
-    previousSong,
+        const updated =
+          queue.filter(
+            (song) =>
+              song.id !== id
+          );
 
-    seekSong,
+        setQueue(updated);
+      };
 
-    seekBg,
-    seekBar,
+    const value = {
 
-    time,
+      audioRef,
+
+      track,
+
+      isPlaying,
+
+      play,
+
+      pause,
+
+      next,
+
+      previous,
+
+      playWithId,
+
+      shuffle,
+
+      setShuffle,
+
+      repeat,
+
+      setRepeat,
+
+      handleEnded,
+
+      queue,
+
+      addToQueue,
+
+      removeFromQueue,
+    };
+
+    return (
+
+      <PlayerContext.Provider
+        value={value}
+      >
+
+        {children}
+
+      </PlayerContext.Provider>
+
+    );
   };
 
-  return (
-    <PlayerContext.Provider value={value}>
-
-      {children}
-
-    </PlayerContext.Provider>
-  );
-};
-
-export default PlayerContextProvider;
+export default
+PlayerContextProvider;
