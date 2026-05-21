@@ -1,243 +1,112 @@
 import {
+  BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
 
 import {
-  useContext,
   useState,
 } from "react";
 
-import {
-  PlayerContext,
-} from "./context/PlayerContext";
+import Sidebar
+from "./components/Sidebar";
 
-import {
-  AuthContext,
-} from "./context/AuthContext";
+import Player
+from "./components/Player";
 
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
-import Player from "./components/Player";
+import Navbar
+from "./components/Navbar";
 
-import Home from "./pages/Home";
-import Search from "./pages/Search";
-import Library from "./pages/Library";
+import DisplayHome
+from "./components/DisplayHome";
 
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Album
+from "./pages/Album";
+
+function Home({
+  user,
+  setUser,
+}) {
+
+  return (
+    <div
+      className="
+        flex-1
+        bg-[#121212]
+        m-2
+        rounded-lg
+        p-4
+        overflow-y-auto
+      "
+    >
+
+      <Navbar
+        user={user}
+        setUser={setUser}
+      />
+
+      <DisplayHome />
+
+    </div>
+  );
+}
 
 function App() {
 
-  const [search, setSearch] =
-    useState("");
-
-  /* Auth Context */
-
-  const {
-    user,
-  } = useContext(
-    AuthContext
-  );
-
-  /* Player Context */
-
-  const {
-
-    songs,
-
-    currentSong,
-
-    playSong,
-
-    likedSongs,
-
-    toggleLike,
-
-    recentlyPlayed,
-
-    playlists,
-
-    createPlaylist,
-
-    handleNext,
-
-    handlePrevious,
-
-  } = useContext(
-    PlayerContext
-  );
-
-  /* Search Filter */
-
-  const filteredSongs =
-    songs.filter((song) =>
-
-      song.title
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
-    );
+  const [user, setUser] =
+    useState(null);
 
   return (
+    <BrowserRouter>
 
-    <div className="flex h-screen bg-black text-white">
+      <div
+        className="
+          bg-black
+          h-screen
+          text-white
+          flex
+          flex-col
+        "
+      >
 
-      {/* Sidebar */}
+        {/* MAIN */}
+        <div
+          className="
+            flex
+            flex-1
+            overflow-hidden
+          "
+        >
 
-      {user && <Sidebar />}
+          <Sidebar />
 
-      <div className="w-full md:w-[75%] p-6 overflow-y-auto pb-32">
+          <Routes>
 
-        {/* Navbar */}
-
-        {user && (
-
-          <Navbar
-            search={search}
-            setSearch={setSearch}
-          />
-
-        )}
-
-        <Routes>
-
-          {/* Login */}
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          {/* Signup */}
-
-          <Route
-            path="/signup"
-            element={<Signup />}
-          />
-
-          {/* Home */}
-
-          <Route
-            path="/"
-            element={
-
-              user ? (
-
+            <Route
+              path="/"
+              element={
                 <Home
-
-                  filteredSongs={
-                    filteredSongs
-                  }
-
-                  recentlyPlayed={
-                    recentlyPlayed
-                  }
-
-                  playSong={
-                    playSong
-                  }
-
-                  likedSongs={
-                    likedSongs
-                  }
-
-                  toggleLike={
-                    toggleLike
-                  }
+                  user={user}
+                  setUser={setUser}
                 />
+              }
+            />
 
-              ) : (
+            <Route
+              path="/album/:id"
+              element={<Album />}
+            />
 
-                <Login />
+          </Routes>
 
-              )
-            }
-          />
+        </div>
 
-          {/* Search */}
-
-          <Route
-            path="/search"
-            element={
-
-              user ? (
-
-                <Search />
-
-              ) : (
-
-                <Login />
-
-              )
-            }
-          />
-
-          {/* Library */}
-
-          <Route
-            path="/library"
-            element={
-
-              user ? (
-
-                <Library
-
-                  likedSongs={
-                    likedSongs
-                  }
-
-                  playSong={
-                    playSong
-                  }
-
-                  toggleLike={
-                    toggleLike
-                  }
-
-                  playlists={
-                    playlists
-                  }
-
-                  createPlaylist={
-                    createPlaylist
-                  }
-                />
-
-              ) : (
-
-                <Login />
-
-              )
-            }
-          />
-
-        </Routes>
+        {/* PLAYER */}
+        <Player />
 
       </div>
 
-      {/* Player */}
-
-      {user && currentSong && (
-
-        <Player
-          currentSong={
-            currentSong
-          }
-
-          onNext={
-            handleNext
-          }
-
-          onPrevious={
-            handlePrevious
-          }
-        />
-
-      )}
-
-    </div>
+    </BrowserRouter>
   );
 }
 

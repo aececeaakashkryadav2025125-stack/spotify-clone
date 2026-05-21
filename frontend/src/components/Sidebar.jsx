@@ -1,47 +1,153 @@
-import {
-  House,
-  Search,
-  Library,
-} from "lucide-react";
+const Sidebar = () => {
 
-import { Link } from "react-router-dom";
-
-function Sidebar() {
   return (
+    <div
+      className="
+        hidden
+        md:block
 
-    <div className="hidden md:block md:w-[25%] bg-[#121212] p-5">
+        w-[25%]
 
-      <h1 className="text-3xl font-bold text-green-500 mb-10">
-        Spotify
-      </h1>
+        bg-black
+        p-2
+      "
+    >
 
-      <ul className="space-y-6 text-lg">
+      {/* TOP */}
+      <div
+        className="
+          bg-[#121212]
+          rounded-lg
+          p-4
+        "
+      >
 
-        <Link to="/">
-          <li className="flex items-center gap-3 hover:text-green-500 cursor-pointer">
-            <House />
-            Home
-          </li>
-        </Link>
+        <h1
+          className="
+            text-green-500
+            text-4xl
+            font-bold
+            mb-8
+          "
+        >
+          Spotify
+        </h1>
 
-        <Link to="/search">
-          <li className="flex items-center gap-3 hover:text-green-500 cursor-pointer">
-            <Search />
-            Search
-          </li>
-        </Link>
+        <div
+          className="
+            flex
+            flex-col
+            gap-5
+            text-lg
+          "
+        >
 
-        <Link to="/library">
-          <li className="flex items-center gap-3 hover:text-green-500 cursor-pointer">
-            <Library />
-            Your Library
-          </li>
-        </Link>
+          <p
+            className="
+              hover:text-green-500
+              cursor-pointer
+              transition-all
+            "
+          >
+            🏠 Home
+          </p>
 
-      </ul>
+          <p
+            className="
+              hover:text-green-500
+              cursor-pointer
+              transition-all
+            "
+          >
+            🔍 Search
+          </p>
+
+          <p
+            className="
+              hover:text-green-500
+              cursor-pointer
+              transition-all
+            "
+          >
+            📚 Library
+          </p>
+
+        </div>
+
+      </div>
+
+      {/* PLAYLISTS */}
+      <div
+        className="
+          bg-[#121212]
+          rounded-lg
+          mt-2
+          p-4
+        "
+      >
+
+        <h2
+          className="
+            text-xl
+            font-bold
+            mb-5
+          "
+        >
+          Playlists
+        </h2>
+
+        <div
+          className="
+            flex
+            flex-col
+            gap-4
+          "
+        >
+
+          <div
+            className="
+              bg-[#242424]
+              p-4
+              rounded-lg
+              hover:bg-[#333333]
+              transition-all
+              cursor-pointer
+            "
+          >
+
+            <p className="font-bold">
+
+              Create Playlist
+
+            </p>
+
+          </div>
+
+          <div
+            className="
+              bg-[#242424]
+              p-4
+              rounded-lg
+              hover:bg-[#333333]
+              transition-all
+              cursor-pointer
+            "
+          >
+
+            <p className="font-bold">
+
+              ❤️ Liked Songs
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
   );
-}
+};
 
 export default Sidebar;

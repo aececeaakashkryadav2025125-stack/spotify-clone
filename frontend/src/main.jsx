@@ -2,17 +2,12 @@ import React from "react";
 
 import ReactDOM from "react-dom/client";
 
-import {
-  BrowserRouter,
-} from "react-router-dom";
-
 import App from "./App";
 
 import "./index.css";
 
-import PlayerProvider from "./context/PlayerContext";
-
-import AuthProvider from "./context/AuthContext";
+import PlayerContextProvider
+from "./context/PlayerContext";
 
 ReactDOM.createRoot(
   document.getElementById("root")
@@ -20,19 +15,12 @@ ReactDOM.createRoot(
 
   <React.StrictMode>
 
-    <BrowserRouter>
+    <PlayerContextProvider>
 
-      <AuthProvider>
+      <App />
 
-        <PlayerProvider>
-
-          <App />
-
-        </PlayerProvider>
-
-      </AuthProvider>
-
-    </BrowserRouter>
+    </PlayerContextProvider>
 
   </React.StrictMode>
+
 );

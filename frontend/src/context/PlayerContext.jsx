@@ -1,319 +1,230 @@
 import {
   createContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
-import {
-  getAllSongs,
-} from "../api/songApi";
+import { songsData }
+from "../assets/assets";
 
 export const PlayerContext =
   createContext();
 
-function PlayerProvider({
+const PlayerContextProvider = ({
   children,
-}) {
+}) => {
 
-  /* Songs */
+  // AUDIO REF
+  const audioRef =
+    useRef(new Audio());
 
-  const [songs, setSongs] =
-    useState([]);
+  // SEEK BAR REFS
+  const seekBg = useRef();
 
-  /* Current Song */
+  const seekBar = useRef();
 
-  const [currentSongIndex,
-    setCurrentSongIndex] =
+  // CURRENT TRACK
+  const [track, setTrack] =
+    useState(songsData[0]);
 
-    useState(
+  // PLAY STATUS
+  const [playStatus, setPlayStatus] =
+    useState(false);
 
-      Number(
+  // TIMER
+  const [time, setTime] =
+    useState({
+      currentTime: {
+        second: 0,
+        minute: 0,
+      },
 
-        localStorage.getItem(
-          "currentSongIndex"
+      totalTime: {
+        second: 0,
+        minute: 0,
+      },
+    });
+
+  // PLAY SONG WITH ID
+  const playWithId = async (id) => {
+
+    try {
+
+      const selectedSong =
+        songsData[id];
+
+      setTrack(selectedSong);
+
+      audioRef.current.src =
+        selectedSong.file;
+
+      await audioRef.current.play();
+
+      setPlayStatus(true);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // PLAY
+  const playSong = async () => {
+
+    try {
+
+      await audioRef.current.play();
+
+      setPlayStatus(true);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // PAUSE
+  const pauseSong = () => {
+
+    audioRef.current.pause();
+
+    setPlayStatus(false);
+  };
+
+  // NEXT
+  const nextSong = async () => {
+
+    try {
+
+      if (
+        track.id <
+        songsData.length - 1
+      ) {
+
+        await playWithId(
+          track.id + 1
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // PREVIOUS
+  const previousSong = async () => {
+
+    try {
+
+      if (track.id > 0) {
+
+        await playWithId(
+          track.id - 1
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // SEEK SONG
+  const seekSong = async (e) => {
+
+    audioRef.current.currentTime =
+      (
+        (
+          e.nativeEvent.offsetX /
+          seekBg.current.offsetWidth
         )
+        *
+        audioRef.current.duration
+      );
 
-      ) || 0
-    );
+  };
 
-  /* Search */
-
-  const [search, setSearch] =
-    useState("");
-
-  /* Recently Played */
-
-  const [recentlyPlayed,
-    setRecentlyPlayed] =
-
-    useState(
-
-      JSON.parse(
-
-        localStorage.getItem(
-          "recentlyPlayed"
-        )
-
-      ) || []
-    );
-
-  /* Liked Songs */
-
-  const [likedSongs,
-    setLikedSongs] =
-
-    useState(
-
-      JSON.parse(
-
-        localStorage.getItem(
-          "likedSongs"
-        )
-
-      ) || []
-    );
-
-  /* Playlists */
-
-  const [playlists,
-    setPlaylists] =
-
-    useState(
-
-      JSON.parse(
-
-        localStorage.getItem(
-          "playlists"
-        )
-
-      ) || []
-    );
-
-  /* Fetch Songs From Backend */
-
+  // UPDATE TIMER + SEEK BAR
   useEffect(() => {
 
-    const fetchSongs =
-      async () => {
+    audioRef.current.ontimeupdate =
+      () => {
 
-        try {
+        // SEEK BAR WIDTH
+        seekBar.current.style.width =
+          Math.floor(
+            (
+              audioRef.current.currentTime
+              /
+              audioRef.current.duration
+            )
+            * 100
+          ) + "%";
 
-          const data =
-            await getAllSongs();
+        // TIMER
+        setTime({
+          currentTime: {
+            second: Math.floor(
+              audioRef.current.currentTime
+              % 60
+            ),
 
-          setSongs(data);
+            minute: Math.floor(
+              audioRef.current.currentTime
+              / 60
+            ),
+          },
 
-        } catch (error) {
+          totalTime: {
+            second: Math.floor(
+              audioRef.current.duration
+              % 60
+            ),
 
-          console.log(error);
-        }
+            minute: Math.floor(
+              audioRef.current.duration
+              / 60
+            ),
+          },
+        });
       };
-
-    fetchSongs();
 
   }, []);
 
-  /* Save Current Song */
+  const value = {
+    track,
+    playStatus,
 
-  useEffect(() => {
+    playWithId,
+    playSong,
+    pauseSong,
 
-    localStorage.setItem(
+    nextSong,
+    previousSong,
 
-      "currentSongIndex",
+    seekSong,
 
-      currentSongIndex
-    );
+    seekBg,
+    seekBar,
 
-  }, [currentSongIndex]);
-
-  /* Current Song */
-
-  const currentSong =
-    songs[currentSongIndex];
-
-  /* Play Song */
-
-  const playSong =
-    (song) => {
-
-      setCurrentSongIndex(
-
-        songs.findIndex(
-          (s) =>
-            s.id === song.id
-        )
-      );
-
-      const updatedRecent = [
-
-        song,
-
-        ...recentlyPlayed.filter(
-          (s) =>
-            s.id !== song.id
-        ),
-
-      ].slice(0, 5);
-
-      setRecentlyPlayed(
-        updatedRecent
-      );
-
-      localStorage.setItem(
-
-        "recentlyPlayed",
-
-        JSON.stringify(
-          updatedRecent
-        )
-      );
-    };
-
-  /* Next Song */
-
-  const handleNext = () => {
-
-    setCurrentSongIndex(
-      (prev) =>
-
-        prev ===
-        songs.length - 1
-
-          ? 0
-
-          : prev + 1
-    );
+    time,
   };
-
-  /* Previous Song */
-
-  const handlePrevious = () => {
-
-    setCurrentSongIndex(
-      (prev) =>
-
-        prev === 0
-
-          ? songs.length - 1
-
-          : prev - 1
-    );
-  };
-
-  /* Toggle Like */
-
-  const toggleLike =
-    (song) => {
-
-      const exists =
-
-        likedSongs.find(
-          (s) =>
-            s.id === song.id
-        );
-
-      let updatedLikes;
-
-      if (exists) {
-
-        updatedLikes =
-          likedSongs.filter(
-            (s) =>
-              s.id !== song.id
-          );
-
-      } else {
-
-        updatedLikes = [
-          ...likedSongs,
-          song,
-        ];
-      }
-
-      setLikedSongs(
-        updatedLikes
-      );
-
-      localStorage.setItem(
-
-        "likedSongs",
-
-        JSON.stringify(
-          updatedLikes
-        )
-      );
-    };
-
-  /* Create Playlist */
-
-  const createPlaylist =
-    (playlistName) => {
-
-      const newPlaylist = {
-
-        id: Date.now(),
-
-        name: playlistName,
-
-        songs: [],
-      };
-
-      const updatedPlaylists = [
-
-        ...playlists,
-
-        newPlaylist,
-      ];
-
-      setPlaylists(
-        updatedPlaylists
-      );
-
-      localStorage.setItem(
-
-        "playlists",
-
-        JSON.stringify(
-          updatedPlaylists
-        )
-      );
-    };
 
   return (
-
-    <PlayerContext.Provider
-      value={{
-
-        songs,
-
-        currentSong,
-
-        search,
-
-        setSearch,
-
-        playSong,
-
-        handleNext,
-
-        handlePrevious,
-
-        recentlyPlayed,
-
-        likedSongs,
-
-        toggleLike,
-
-        playlists,
-
-        createPlaylist,
-      }}
-    >
+    <PlayerContext.Provider value={value}>
 
       {children}
 
     </PlayerContext.Provider>
   );
-}
+};
 
-export default PlayerProvider;
+export default PlayerContextProvider;

@@ -1,139 +1,277 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useContext }
+from "react";
 
 import {
+  FaPlay,
+  FaPause,
+  FaStepForward,
+  FaStepBackward,
+} from "react-icons/fa";
 
-  Play,
+import {
+  PlayerContext,
+}
+from "../context/PlayerContext";
 
-  Pause,
+const Player = () => {
 
-  SkipBack,
+  const {
+    track,
+    playStatus,
 
-  SkipForward,
+    playSong,
+    pauseSong,
 
-} from "lucide-react";
+    nextSong,
+    previousSong,
 
-function Player({
+    seekSong,
 
-  currentSong,
+    seekBg,
+    seekBar,
 
-  onNext,
-
-  onPrevious,
-
-}) {
-
-  const audioRef =
-    useRef(null);
-
-  const [isPlaying,
-    setIsPlaying] =
-
-    useState(false);
-
-  /* Auto Play */
-
-  useEffect(() => {
-
-    if (
-
-      currentSong?.file &&
-
-      audioRef.current
-
-    ) {
-
-      audioRef.current.play()
-
-        .then(() => {
-
-          setIsPlaying(true);
-
-        })
-
-        .catch((error) => {
-
-          console.log(error);
-        });
-    }
-
-  }, [currentSong]);
-
-  /* Play / Pause */
-
-  const togglePlay =
-    () => {
-
-      if (!audioRef.current)
-        return;
-
-      if (isPlaying) {
-
-        audioRef.current.pause();
-
-      } else {
-
-        audioRef.current.play();
-      }
-
-      setIsPlaying(
-        !isPlaying
-      );
-    };
-
-  /* Prevent Crash */
-
-  if (!currentSong) {
-
-    return null;
-  }
+    time,
+  } = useContext(PlayerContext);
 
   return (
+    <div
+      className="
+        min-h-[120px]
+        bg-black
+        border-t
+        border-gray-800
 
-    <div className="fixed bottom-0 left-0 w-full bg-[#181818] border-t border-gray-800 px-6 py-4 flex items-center justify-between z-50">
+        flex
+        flex-col
+        md:flex-row
 
-      {/* Song Info */}
+        items-center
+        justify-between
 
-      <div className="flex items-center gap-4 w-[30%]">
+        gap-4
+
+        px-4
+        py-3
+
+        text-white
+      "
+    >
+
+      {/* LEFT */}
+      <div
+        className="
+          flex
+          items-center
+          gap-4
+
+          w-full
+          md:w-[25%]
+        "
+      >
 
         <img
-
-          src={
-
-            currentSong.image ||
-
-            "https://via.placeholder.com/150"
-          }
-
-          alt={currentSong.title}
-
-          className="w-16 h-16 object-cover rounded"
+          src={track.image}
+          alt=""
+          className="
+            w-14
+            h-14
+            rounded
+            object-cover
+          "
         />
 
         <div>
 
-          <h2 className="font-bold text-white">
+          <p className="font-bold">
+            {track.name}
+          </p>
 
-            {
+          <p
+            className="
+              text-sm
+              text-gray-400
+            "
+          >
+            {track.artist}
+          </p>
 
-              currentSong.title ||
+        </div>
 
-              "Unknown Song"
-            }
+      </div>
 
-          </h2>
+      {/* CENTER */}
+      <div
+        className="
+          flex
+          flex-col
+          items-center
+          gap-4
 
-          <p className="text-gray-400 text-sm">
+          w-full
+          md:w-[50%]
+        "
+      >
 
-            {
+        {/* CONTROLS */}
+        <div
+          className="
+            flex
+            items-center
+            gap-6
+          "
+        >
 
-              currentSong.artist ||
+          {/* PREVIOUS */}
+          <button
+            onClick={previousSong}
+            className="
+              text-gray-300
+              hover:text-green-500
+              transition-all
+              duration-300
+            "
+          >
+            <FaStepBackward size={22} />
+          </button>
 
-              "Unknown Artist"
-            }
+          {/* PLAY / PAUSE */}
+          {playStatus ? (
+
+            <button
+              onClick={pauseSong}
+              className="
+                bg-white
+                text-black
+
+                w-14
+                h-14
+
+                rounded-full
+
+                flex
+                items-center
+                justify-center
+
+                hover:scale-105
+
+                transition-all
+                duration-300
+              "
+            >
+              <FaPause size={22} />
+            </button>
+
+          ) : (
+
+            <button
+              onClick={playSong}
+              className="
+                bg-green-500
+                text-black
+
+                w-14
+                h-14
+
+                rounded-full
+
+                flex
+                items-center
+                justify-center
+
+                hover:scale-105
+
+                transition-all
+                duration-300
+              "
+            >
+              <FaPlay size={22} />
+            </button>
+
+          )}
+
+          {/* NEXT */}
+          <button
+            onClick={nextSong}
+            className="
+              text-gray-300
+              hover:text-green-500
+              transition-all
+              duration-300
+            "
+          >
+            <FaStepForward size={22} />
+          </button>
+
+        </div>
+
+        {/* SEEK BAR */}
+        <div
+          className="
+            flex
+            items-center
+            gap-3
+            w-full
+          "
+        >
+
+          {/* CURRENT TIME */}
+          <p
+            className="
+              text-xs
+              md:text-sm
+            "
+          >
+
+            {time.currentTime.minute}:
+
+            {String(
+              time.currentTime.second
+            ).padStart(2, "0")}
+
+          </p>
+
+          {/* SEEK BAR */}
+          <div
+            ref={seekBg}
+            onClick={seekSong}
+            className="
+              w-full
+              bg-gray-700
+              rounded-full
+              h-1.5
+              cursor-pointer
+              overflow-hidden
+            "
+          >
+
+            <hr
+              ref={seekBar}
+              className="
+                h-full
+                border-none
+                w-[0%]
+
+                bg-green-500
+
+                rounded-full
+              "
+            />
+
+          </div>
+
+          {/* TOTAL TIME */}
+          <p
+            className="
+              text-xs
+              md:text-sm
+            "
+          >
+
+            {time.totalTime.minute}:
+
+            {String(
+              time.totalTime.second
+            ).padStart(2, "0")}
 
           </p>
 
@@ -141,73 +279,11 @@ function Player({
 
       </div>
 
-      {/* Controls */}
-
-      <div className="flex items-center gap-6">
-
-        <button
-          onClick={
-            onPrevious
-          }
-        >
-
-          <SkipBack
-            className="text-white"
-          />
-
-        </button>
-
-        <button
-
-          onClick={
-            togglePlay
-          }
-
-          className="bg-white rounded-full p-3 text-black"
-        >
-
-          {
-
-            isPlaying
-
-              ? <Pause />
-
-              : <Play />
-          }
-
-        </button>
-
-        <button
-          onClick={
-            onNext
-          }
-        >
-
-          <SkipForward
-            className="text-white"
-          />
-
-        </button>
-
-      </div>
-
-      {/* Audio */}
-
-      {
-
-        currentSong.file && (
-
-          <audio
-
-            ref={audioRef}
-
-            src={currentSong.file}
-          />
-        )
-      }
+      {/* RIGHT */}
+      <div className="hidden md:block w-[25%]"></div>
 
     </div>
   );
-}
+};
 
 export default Player;
