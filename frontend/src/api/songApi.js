@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API =
-  "http://localhost:8080/songs";
+  "https://spotify-clone-2srv.onrender.com/songs";
 
 // GET SONGS
 export const getSongs =
